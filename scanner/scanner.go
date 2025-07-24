@@ -46,6 +46,11 @@ func (s *Scanner) Run() {
 
 func (s *Scanner) process(input string) {
 	args := strings.Fields(input)
+	if len(args) == 0 {
+		printNotEnoughArgs()
+		return
+	}
+
 	cmd := args[0]
 
 	switch cmd {
@@ -54,22 +59,57 @@ func (s *Scanner) process(input string) {
 	case "list":
 		if len(s.taskList.Tasks) == 0 {
 			printEmptyTaskList()
-		} else {
-			printTasks(&s.taskList.Tasks)
+			break
 		}
+
+		printTasks(&s.taskList.Tasks)
 	case "add":
-		if len(args[1:]) < 2 {
+		if len(args) < 3 {
 			printNotEnoughArgs()
-		} else {
-			newTask := tasks.NewTask(args[1], strings.Join(args[2:], " "))
-			s.taskList.Add(newTask)
-			printTaskAdded()
+			break
 		}
-	// TODO: del done
+
+		newTask := tasks.NewTask(args[1], strings.Join(args[2:], " "))
+		s.taskList.Add(newTask)
+		printTaskAdded()
 	case "del":
-		printTaskDeleted()
+		if len(args) < 2 {
+			printNotEnoughArgs()
+			break
+		}
+
+		found := false
+		for i, task := range s.taskList.Tasks {
+			if task.Header == args[1] {
+				s.taskList.Tasks = append(s.taskList.Tasks[:i], s.taskList.Tasks[i+1:]...)
+				printTaskDeleted()
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			printTaskNotFound()
+		}
 	case "done":
-		printTaskDone()
+		if len(args) < 2 {
+			printNotEnoughArgs()
+			break
+		}
+
+		found := false
+		for i := range s.taskList.Tasks {
+			if s.taskList.Tasks[i].Header == args[1] {
+				s.taskList.Tasks[i].MarkDone()
+				printTaskDone()
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			printTaskNotFound()
+		}
 	case "events":
 		if len(s.events) == 0 {
 			printEmptyEvents()

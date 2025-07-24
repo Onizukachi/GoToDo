@@ -10,6 +10,16 @@ type Task struct {
 	DoneAt    time.Time
 }
 
+func (t *Task) MarkDone() {
+	t.IsDone = true
+	t.DoneAt = time.Now()
+}
+
+func (t *Task) UnmarkDone() {
+	t.IsDone = false
+	t.DoneAt = time.Time{}
+}
+
 func NewTask(header, body string) *Task {
 	return &Task{
 		Header:    header,

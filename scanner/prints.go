@@ -71,3 +71,7 @@ func printUnknownCmd() {
 func printInputError(err *error) {
 	fmt.Fprintf(os.Stderr, "ошибка чтения ввода %v", err)
 }
+
+func printTaskNotFound() {
+	fmt.Println("Задача с таким заголовком не найдена :(")
+}
