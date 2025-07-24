@@ -15,16 +15,16 @@ type Scanner struct {
 	events    []Event
 }
 
-func (s *Scanner) logEvent(event *Event) {
-	s.events = append(s.events, *event)
-}
-
-func NewScanner(tasks tasks.TaskList) *Scanner {
+func NewScanner(tasks *tasks.TaskList) *Scanner {
 	return &Scanner{
-		taskList:  tasks,
+		taskList:  *tasks,
 		ioScanner: bufio.NewScanner(os.Stdin),
 		events:    []Event{},
 	}
+}
+
+func (s *Scanner) logEvent(event *Event) {
+	s.events = append(s.events, *event)
 }
 
 func (s *Scanner) Run() {
@@ -38,8 +38,9 @@ func (s *Scanner) Run() {
 			continue
 		}
 
-		s.logEvent(NewEvent(""))
-		s.process(s.ioScanner.Text())
+		input := s.ioScanner.Text()
+		s.logEvent(NewEvent(input))
+		s.process(input)
 		fmt.Println()
 	}
 }
@@ -55,67 +56,17 @@ func (s *Scanner) process(input string) {
 
 	switch cmd {
 	case "help":
-		printHelp()
+		s.cmdHelp()
 	case "list":
-		if len(s.taskList.Tasks) == 0 {
-			printEmptyTaskList()
-			break
-		}
-
-		printTasks(&s.taskList.Tasks)
+		s.cmdList()
 	case "add":
-		if len(args) < 3 {
-			printNotEnoughArgs()
-			break
-		}
-
-		newTask := tasks.NewTask(args[1], strings.Join(args[2:], " "))
-		s.taskList.Add(newTask)
-		printTaskAdded()
+		s.cmdAdd(args)
 	case "del":
-		if len(args) < 2 {
-			printNotEnoughArgs()
-			break
-		}
-
-		found := false
-		for i, task := range s.taskList.Tasks {
-			if task.Header == args[1] {
-				s.taskList.Tasks = append(s.taskList.Tasks[:i], s.taskList.Tasks[i+1:]...)
-				printTaskDeleted()
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			printTaskNotFound()
-		}
+		s.cmdDel(args)
 	case "done":
-		if len(args) < 2 {
-			printNotEnoughArgs()
-			break
-		}
-
-		found := false
-		for i := range s.taskList.Tasks {
-			if s.taskList.Tasks[i].Header == args[1] {
-				s.taskList.Tasks[i].MarkDone()
-				printTaskDone()
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			printTaskNotFound()
-		}
+		s.cmdMarkDone(args)
 	case "events":
-		if len(s.events) == 0 {
-			printEmptyEvents()
-		} else {
-			printEvents(&s.events)
-		}
+		s.listEvents()
 	case "exit":
 		printExit()
 		os.Exit(0)

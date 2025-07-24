@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	tasks := tasks.TaskList{}
+	tasks := tasks.NewTaskList()
 	scanner := scanner.NewScanner(tasks)
 	scanner.Run()
 }

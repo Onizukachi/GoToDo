@@ -22,10 +22,12 @@ func printGetInput() {
 	fmt.Print("Введите команду: ")
 }
 
-func printTasks(tasks *[]tasks.Task) {
+func printTasks(tasks map[string]*tasks.Task) {
+	i := 0
 	fmt.Println("Cписок дел:")
-	for i, task := range *tasks {
-		fmt.Printf("%d. %s. %s. Статус: %v\n", i+1, task.Header, task.Body, task.IsDone)
+	for _, task := range tasks {
+		i++
+		fmt.Printf("%d. %s. %s. Статус: %v\n", i, task.Header, task.Body, task.IsDone)
 	}
 }
 
@@ -70,8 +72,4 @@ func printUnknownCmd() {
 
 func printInputError(err *error) {
 	fmt.Fprintf(os.Stderr, "ошибка чтения ввода %v", err)
-}
-
-func printTaskNotFound() {
-	fmt.Println("Задача с таким заголовком не найдена :(")
 }
